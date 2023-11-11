@@ -1,0 +1,12 @@
+{
+    "name":"zeng-webserver",
+    "version":"1.0.0",
+    "description":"",
+    "main":"bin/www.js",
+    "scripts": {
+        "dev":"node bin/www.js"
+    },
+    "keywords":[],
+    "author":"",
+    "license":"ISC"
+}

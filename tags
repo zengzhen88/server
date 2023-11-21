@@ -1,0 +1,45 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ConnectionStatus	/home/zeng/share/webserver/server/www/src/route/route.js	472;"	p	class:DeviceJSD201Type
+JMD211	/home/zeng/share/webserver/server/www/src/route/route.js	438;"	p	class:DeviceID
+JSD201	/home/zeng/share/webserver/server/www/src/route/route.js	439;"	p	class:DeviceID
+KeyStatus	/home/zeng/share/webserver/server/www/src/route/route.js	469;"	p	class:DeviceJSD201Type
+MessageId	/home/zeng/share/webserver/server/www/src/route/route.js	467;"	p	class:DeviceJSD201Type
+MotorStatus	/home/zeng/share/webserver/server/www/src/route/route.js	468;"	p	class:DeviceJSD201Type
+ReminderType	/home/zeng/share/webserver/server/www/src/route/route.js	465;"	p	class:DeviceJSD201Type
+SignalStrength	/home/zeng/share/webserver/server/www/src/route/route.js	471;"	p	class:DeviceJSD201Type
+StepNumber	/home/zeng/share/webserver/server/www/src/route/route.js	464;"	p	class:DeviceJSD201Type
+TerminalBatteryLevel	/home/zeng/share/webserver/server/www/src/route/route.js	470;"	p	class:DeviceJSD201Type
+TerminalTime	/home/zeng/share/webserver/server/www/src/route/route.js	466;"	p	class:DeviceJSD201Type
+Version	/home/zeng/share/webserver/server/www/src/route/route.js	473;"	p	class:DeviceJSD201Type
+WearingStatus	/home/zeng/share/webserver/server/www/src/route/route.js	463;"	p	class:DeviceJSD201Type
+fs	/home/zeng/share/webserver/server/www/src/route/route.js	1;"	v
+gArray	/home/zeng/share/webserver/server/www/src/route/route.js	18;"	v
+gBatteryLevel	/home/zeng/share/webserver/server/www/src/route/route.js	13;"	v
+gBlemVer	/home/zeng/share/webserver/server/www/src/route/route.js	16;"	v
+gGateWayVer	/home/zeng/share/webserver/server/www/src/route/route.js	15;"	v
+gNeedConfig	/home/zeng/share/webserver/server/www/src/route/route.js	17;"	v
+gPower	/home/zeng/share/webserver/server/www/src/route/route.js	12;"	v
+gTemperature	/home/zeng/share/webserver/server/www/src/route/route.js	14;"	v
+gTimestamp	/home/zeng/share/webserver/server/www/src/route/route.js	11;"	v
+htype	/home/zeng/share/webserver/server/www/src/route/route.js	119;"	p	class:var.marray
+htype	/home/zeng/share/webserver/server/www/src/route/route.js	188;"	p	class:var.marray
+htype	/home/zeng/share/webserver/server/www/src/route/route.js	303;"	p	class:var.marray
+htype	/home/zeng/share/webserver/server/www/src/route/route.js	355;"	p	class:var.marray
+htype	/home/zeng/share/webserver/server/www/src/route/route.js	776;"	p	class:var.marray
+ip	/home/zeng/share/webserver/server/www/src/route/route.js	190;"	p	class:var.marray
+main	/home/zeng/share/webserver/server/1.c	6;"	f	signature:(void)
+path	/home/zeng/share/webserver/server/www/src/route/route.js	2;"	v
+ret	/home/zeng/share/webserver/server/www/src/route/route.js	777;"	p	class:var.marray
+seq	/home/zeng/share/webserver/server/www/src/route/route.js	120;"	p	class:var.marray
+seq	/home/zeng/share/webserver/server/www/src/route/route.js	189;"	p	class:var.marray
+seq	/home/zeng/share/webserver/server/www/src/route/route.js	304;"	p	class:var.marray
+seq	/home/zeng/share/webserver/server/www/src/route/route.js	356;"	p	class:var.marray
+time	/home/zeng/share/webserver/server/www/src/route/route.js	305;"	p	class:var.marray
+token	/home/zeng/share/webserver/server/www/src/route/route.js	778;"	p	class:var.marray
+url	/home/zeng/share/webserver/server/www/src/route/route.js	121;"	p	class:var.marray
+year	/home/zeng/share/webserver/server/www/src/route/route.js	287;"	p	class:const

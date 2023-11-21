@@ -14,7 +14,8 @@ var gBatteryLevel       = 0;
 var gTemperature        = 0;
 var gGateWayVer         = '';
 var gBlemVer            = '';
-var gHttpUrlArray = [];
+var gNeedConfig         = 0;
+var gArray              = [];
 
 
 /****************************************
@@ -64,6 +65,7 @@ const btnLoginHtml = (req, res) => {
             var html = fs.readFileSync(mHtml, 'utf8');
             res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
             res.write(html);
+            res.end();
             return gJustSpace;
         }
         else {
@@ -181,13 +183,13 @@ const httpurl = (req, res) => {
         htype:"setHttpServer",
         seq:123,
         ip:req.query.ip,
-        port:req.query.port,
+        port:parseInt(req.query.port),
     }
-    gHttpUrlArray.push(marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
 
-    console.log('setHttpServer>>>>>>>>>>>>>>>>>>>>>>>>>', gHttpUrlArray);
-
-    return gHttpUrlArray;
+    return httpurlInfo(req, res, "设置Web服务器", 1);
+    // return gArray;
 }
 
 const httpurlHtml = (req, res) => {
@@ -213,6 +215,1061 @@ const httpurlHtml = (req, res) => {
         else {
             //参数都填写了
             return httpurl(req, res);
+        }
+    }
+}
+
+////同步系统时间
+const synctimeInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关同步服务器时间 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const synctimeHtml = (req, res) => {
+    const currentTime = new Date();
+    const timeJson = {
+        year: currentTime.getFullYear(),
+        month: currentTime.getMonth() + 1,
+        day: currentTime.getDate(),
+        hour: currentTime.getHours(),
+        minute: currentTime.getMinutes(),
+        second: currentTime.getSeconds(),
+    };
+    console.log("currentTime:", timeJson);
+    console.log("currentTime:", currentTime.getTime());
+    console.log(currentTime.getTimezoneOffset());
+    console.log(currentTime.getTimezoneOffset()*60*1000);
+    console.log(currentTime.getTimezoneOffset()*60*1000+8*60*60*1000);
+
+    var marray = {
+        htype:"synTime",
+        seq:123,
+        time:((parseInt(currentTime.getTime()/1000)) - (currentTime.getTimezoneOffset()*60*1000)),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    var timestring = "同步Web服务器系统时间:";
+    timestring += String(currentTime.getFullYear());
+    timestring += '年 ';
+    timestring += String(currentTime.getMonth() + 1);
+    timestring += '月 ';
+    timestring += String(currentTime.getDate());
+    timestring += '日 ';
+    timestring += String(currentTime.getHours());
+    timestring += ':';
+    timestring += String(currentTime.getMinutes());
+    timestring += ':';
+    timestring += String(currentTime.getSeconds());
+    return synctimeInfo(req, res, timestring, 1);
+}
+
+////获取蓝牙信息
+const getbleminfoInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取蓝牙信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'getbleminfo\' value=\'获取蓝牙信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const getbleminfo = (req, res) => {
+    var marray = {
+        htype:"getBlemInfo",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getbleminfoInfo(req, res, "获取蓝牙信息", 1);
+    // return gArray;
+}
+
+const getbleminfoHtml = (req, res) => {
+    if (req.url === '/getbleminfo.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getbleminfo.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getbleminfo(req, res);
+    }
+}
+
+////设置蓝牙信息
+const setbleminfoInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置蓝牙信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setbleminfo\' value=\'设置蓝牙信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setbleminfo = (req, res) => {
+    var value = req.query.value;
+    var marray = {
+        htype:"setBlemInfo",
+        seq:123,
+        value:value,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setbleminfoInfo(req, res, "设置蓝牙信息", 1);
+    // return gArray;
+}
+
+const setbleminfoHtml = (req, res) => {
+    if (req.url === '/setbleminfo.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setbleminfo.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setbleminfo(req, res);
+    }
+}
+
+////获取蓝牙扫描窗口时间
+const getscaninrInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取蓝牙扫描窗口时间 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'getscaninr\' value=\'获取蓝牙扫描窗口时间\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const getscaninr = (req, res) => {
+    var marray = {
+        htype:"getScaninr",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getscaninrInfo(req, res, "获取蓝牙扫描窗口时间", 1);
+    // return gArray;
+}
+
+const getscaninrHtml = (req, res) => {
+    if (req.url === '/getscaninr.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getscaninr.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getscaninr(req, res);
+    }
+}
+
+////设置蓝牙扫描窗口时间
+const setscaninrInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置蓝牙扫描窗口时间 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setscaninr\' value=\'设置蓝牙扫描窗口时间\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setscaninr = (req, res) => {
+    var value = req.query.scaninrtime;
+    console.log("value:", value);
+    var marray = {
+        htype:"setScaninr",
+        seq:123,
+        value:value,
+    }
+    console.log("array::", marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setscaninrInfo(req, res, "设置蓝牙扫描窗口时间", 1);
+    // return gArray;
+}
+
+const setscaninrHtml = (req, res) => {
+    if (req.url === '/setscaninr.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setscaninr.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setscaninr(req, res);
+    }
+}
+
+////获取无线网络信息
+const getwifiInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取无线网络信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'getwifi\' value=\'获取无线网络信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const getwifi = (req, res) => {
+    var marray = {
+        htype:"getWiFi",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getwifiInfo(req, res, "获取无线网络信息", 1);
+    // return gArray;
+}
+
+const getwifiHtml = (req, res) => {
+    if (req.url === '/getwifi.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getwifi.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getwifi(req, res);
+    }
+}
+
+////设置无线网络信息
+const setwifiInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置无线网络信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setwifi\' value=\'设置无线网络信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setwifi = (req, res) => {
+    var ssid    = req.query.ssid;
+    var psk     = req.query.psk;
+    var ip      = req.query.ip;
+    var netmask = req.query.netmask;
+    var gateway = req.query.gateway;
+    var marray  = {
+        htype:"setWiFi",
+        seq:123,
+        ssid:ssid,
+        psk:psk,
+        ip:ip,
+        netmask:netmask,
+        gateway:gateway,
+    }
+    // console.log('req.marray', marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setwifiInfo(req, res, "设置无线网络信息", 1);
+    // return gArray;
+}
+
+const setwifiHtml = (req, res) => {
+    if (req.url === '/setwifi.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setwifi.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setwifi(req, res);
+    }
+}
+
+////获取以太网网络信息
+const getethInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取以太网网络信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'geteth\' value=\'获取以太网网络信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const geteth = (req, res) => {
+    var marray = {
+        htype:"getETH",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getethInfo(req, res, "获取以太网网络信息", 1);
+    // return gArray;
+}
+
+const getethHtml = (req, res) => {
+    if (req.url === '/geteth.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/geteth.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return geteth(req, res);
+    }
+}
+
+////设置以太网网络信息
+const setethInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置以太网网络信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'seteth\' value=\'设置以太网网络信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const seteth = (req, res) => {
+    var ip      = req.query.ip;
+    var netmask = req.query.netmask;
+    var gateway = req.query.gateway;
+    var marray  = {
+        htype:"setETH",
+        seq:123,
+        ip:ip,
+        netmask:netmask,
+        gateway:gateway,
+    }
+    // console.log('req.marray', marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setethInfo(req, res, "设置以太网网络信息", 1);
+    // return gArray;
+}
+
+const setethHtml = (req, res) => {
+    if (req.url === '/seteth.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/seteth.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return seteth(req, res);
+    }
+}
+
+////获取用户名信息
+const getauthInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取用户名信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'getauth\' value=\'获取用户名信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const getauth = (req, res) => {
+    var marray = {
+        htype:"getAuth",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getauthInfo(req, res, "获取用户名信息", 1);
+    // return gArray;
+}
+
+const getauthHtml = (req, res) => {
+    if (req.url === '/getauth.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getauth.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getauth(req, res);
+    }
+}
+
+////设置用户名信息
+const setauthInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置用户名信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setauth\' value=\'设置用户名信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setauth = (req, res) => {
+    var ip      = req.query.ip;
+    var username= req.query.username;
+    var password= req.query.password;
+    var marray  = {
+        htype:"setAuth",
+        seq:123,
+        ip:ip,
+        username:username,
+        password:password,
+    }
+    // console.log('req.marray', marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setauthInfo(req, res, "设置用户名信息", 1);
+    // return gArray;
+}
+
+const setauthHtml = (req, res) => {
+    if (req.url === '/setauth.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setauth.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setauth(req, res);
+    }
+}
+
+////获取服务器信息
+const gethttpserverInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取服务器信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'gethttpserver\' value=\'获取服务器信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const gethttpserver = (req, res) => {
+    var marray = {
+        htype:"getHttpServer",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return gethttpserverInfo(req, res, "获取服务器信息", 1);
+    // return gArray;
+}
+
+const gethttpserverHtml = (req, res) => {
+    if (req.url === '/gethttpserver.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/gethttpserver.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return gethttpserver(req, res);
+    }
+}
+
+////设置服务器信息
+const sethttpserverInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置服务器信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'sethttpserver\' value=\'设置服务器信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const sethttpserver = (req, res) => {
+    var ip      = req.query.ip;
+    var port    = req.query.port;
+    var marray  = {
+        htype:"setHttpServer",
+        seq:123,
+        ip:ip,
+        port:parseInt(port),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return sethttpserverInfo(req, res, "设置服务器信息", 1);
+    // return gArray;
+}
+
+const sethttpserverHtml = (req, res) => {
+    if (req.url === '/sethttpserver.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/sethttpserver.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return sethttpserver(req, res);
+    }
+}
+
+////设置第三方终端上报间隔
+const otmdataintervalInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置第三方终端上报间隔 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'otmdatainterval\' value=\'设置第三方终端上报间隔\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const otmdatainterval = (req, res) => {
+    var ip      = req.query.ip;
+    var interval= req.query.interval;
+    var marray  = {
+        htype:"otMdataInterval",
+        seq:123,
+        interval:parseInt(interval),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return otmdataintervalInfo(req, res, "设置第三方终端上报间隔", 1);
+    // return gArray;
+}
+
+const otmdataintervalHtml = (req, res) => {
+    if (req.url === '/otmdatainterval.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/otmdatainterval.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return otmdatainterval(req, res);
+    }
+}
+
+////显示定时上报终端数据使能
+const reporteddataInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关定时上报终端数据使能 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'reporteddata\' value=\'定时上报终端数据使能\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const reporteddata = (req, res) => {
+    var ip      = req.query.ip;
+    var value   = req.query.value;
+    var marray  = {
+        htype:"reportedData",
+        seq:123,
+        value:value,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return reporteddataInfo(req, res, "定时上报终端数据使能", 1);
+    // return gArray;
+}
+
+const reporteddataHtml = (req, res) => {
+    if (req.url === '/reporteddata.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/reporteddata.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return reporteddata(req, res);
+    }
+}
+
+////显示设置终端默认上报
+const setuploaddefaultInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置终端默认上报 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setuploaddefault\' value=\'设置终端默认上报\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setuploaddefault = (req, res) => {
+    var marray  = {
+        htype:"setUploadDefault",
+        seq:123,
+        deviceID:parseInt(req.query.deviceID),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setuploaddefaultInfo(req, res, "设置终端默认上报", 1);
+    // return gArray;
+}
+
+const setuploaddefaultHtml = (req, res) => {
+    if (req.url === '/setuploaddefault.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setuploaddefault.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setuploaddefault(req, res);
+    }
+}
+
+////显示设置终端指定类型上报
+const setuploadInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关设置终端指定类型上报 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setupload\' value=\'设置终端指定类型上报\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setupload = (req, res) => {
+    var marray  = {
+        htype:"setUpload",
+        seq:123,
+        deviceID:parseInt(req.query.deviceID),
+        deviceMac:(req.query.deviceMac),
+        time:parseInt(req.query.time),
+        type:parseInt(req.query.type),
+        valueRange:req.query.valueRange,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setuploadInfo(req, res, "设置终端指定类型上报", 1);
+    // return gArray;
+}
+
+const setuploadHtml = (req, res) => {
+    if (req.url === '/setupload.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setupload.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setupload(req, res);
+    }
+}
+
+////显示清除蓝牙数据上报信息
+const cleantoterminalInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关清除蓝牙数据上报信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'cleantoterminal\' value=\'清除蓝牙数据上报信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const cleantoterminal = (req, res) => {
+    var marray  = {
+        htype:"cleanToTerminal",
+        seq:123,
+        value:parseInt(req.query.priority),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return cleantoterminalInfo(req, res, "清除蓝牙数据上报信息", 1);
+    // return gArray;
+}
+
+const cleantoterminalHtml = (req, res) => {
+    if (req.url === '/cleantoterminal.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/cleantoterminal.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return cleantoterminal(req, res);
+    }
+}
+
+////显示配置蓝牙数据上报信息
+const toterminalInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关配置蓝牙数据上报信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'toterminal\' value=\'配置蓝牙数据上报信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const toterminal = (req, res) => {
+    var marray  = {
+        htype:"toTerminal",
+        seq:123,
+        deviceID:parseInt(req.query.deviceID),
+        deviceMac:req.query.deviceMac,
+        timeout:parseInt(req.query.timeout),
+        priority:parseInt(req.query.priority),
+        message:req.query.message,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return toterminalInfo(req, res, "配置蓝牙数据上报信息", 1);
+    // return gArray;
+}
+
+const toterminalHtml = (req, res) => {
+    if (req.url === '/toterminal.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/toterminal.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return toterminal(req, res);
+    }
+}
+
+const tarsfertoclient = (array) => {
+    if (gNeedConfig) {
+        gNeedConfig = 0;
+        console.log('send jgd215', gArray);
+        for (var index = 0; index < gArray.length; index++) {
+            array.push(gArray.pop());
         }
     }
 }
@@ -352,9 +1409,9 @@ const  handleRoute = (req, res) => {
     const url = req.url;
     const path = req.path;//url.split('?')[0];
 
-    console.log('method1', method);
-    console.log('url', url);
-    console.log('path', req.path);
+    // console.log('method1', method);
+    // console.log('url', url);
+    // console.log('path', req.path);
 
     if (method === 'GET' && req.path === '/api/route/list') {
         // /api/route/list/?author=zeng&keyword=123
@@ -377,18 +1434,10 @@ const  handleRoute = (req, res) => {
         const id = req.query.id;
         const detailData = getDetail(id);
         return new SuccessModel(detailData);
-        /*
-         * return {
-         *     message: '获取路由详情的接口'
-         * }
-         */
     }
 
     if (method == 'POST' && req.path === '/api/route/update') {
         //192.168.0.117:5000/api/route/update
-        //id +  data
-        //将post数据通过 req.body传过来
-        // console.log(req.body);
         const updateRoutes = updateRoute(id, req.body); 
         if (routeData) {
             return new SuccessModel("更新路由成功");
@@ -409,203 +1458,99 @@ const  handleRoute = (req, res) => {
     }
 
     if (method == 'GET' && req.path === '/jz231') {
+        // console.log('start login');
         return btnLoginHtml(req, res);
     }
     else if (req.path == '/upgradation.html') {
         //显示升级程序
         return upgradationHtml(req, res);
-        // var mHtml = __dirname + "/../../html/upgradation.html";
-        // var html = fs.readFileSync(mHtml, 'utf8');
-        // res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        // res.write(html);
-        // res.end();
-        // return gJustSpace;
+    }
+    else if (req.path == '/synctime.html') {
+        //显示同步系统时间
+        return synctimeHtml(req, res);
+    }
+    else if (req.path == '/getbleminfo.html') {
+        //显示获取蓝牙信息
+        return getbleminfoHtml(req, res);
+    }
+    else if (req.path == '/setbleminfo.html') {
+        //显示修改蓝牙信息
+        return setbleminfoHtml(req, res);
+    }
+    else if (req.path == '/getscaninr.html') {
+        //显示获取蓝牙扫描窗口时间
+        return getscaninrHtml(req, res);
+    }
+    else if (req.path == '/setscaninr.html') {
+        //修改蓝牙扫描窗口时间
+        return setscaninrHtml(req, res);
+    }
+    else if (req.path == '/getwifi.html') {
+        //显示获取无线网络信息
+        return getwifiHtml(req, res);
+    }
+    else if (req.path == '/setwifi.html') {
+        //显示修改获取无线网络信息
+        return setwifiHtml(req, res);
+    }
+    else if (req.path == '/geteth.html') {
+        //显示获取以太网网络信息
+        return getethHtml(req, res);
+    }
+    else if (req.path == '/seteth.html') {
+        //显示修改以太网网络信息
+        return setethHtml(req, res);
+    }
+    else if (req.path == '/getauth.html') {
+        //显示获取用户名信息
+        return getauthHtml(req, res);
+    }
+    else if (req.path == '/setauth.html') {
+        //显示设置用户名信息
+        return setauthHtml(req, res);
+    }
+    else if (req.path == '/gethttpserver.html') {
+        //显示获取服务器信息
+        return gethttpserverHtml(req, res);
     }
     else if (req.path == '/httpurl.html') {
         //显示设置Web服务器
         return httpurlHtml(req, res);
-        // var mHtml = __dirname + "/../../html/httpurl.html";
-        // var html = fs.readFileSync(mHtml, 'utf8');
-        // res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        // res.write(html);
-        // res.end();
-        // return gJustSpace;
-    }
-    else if (req.path == '/synctime.html') {
-        //显示同步系统时间
-        var mHtml = __dirname + "/../../html/synctime.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/getbleminfo.html') {
-        console.log("getbleminfo...");
-        //显示获取蓝牙信息
-        var mHtml = __dirname + "/../../html/getbleminfo.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/setbleminfo.html') {
-        //显示修改蓝牙信息
-        var mHtml = __dirname + "/../../html/setbleminfo.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/getscaninr.html') {
-        //显示获取蓝牙扫描窗口时间
-        var mHtml = __dirname + "/../../html/getscaninr.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/setscaninr.html') {
-        //修改蓝牙扫描窗口时间
-        var mHtml = __dirname + "/../../html/setscaninr.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/getwifi.html') {
-        //显示获取无线网络信息
-        var mHtml = __dirname + "/../../html/getwifi.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/setwifi.html') {
-        //显示修改获取无线网络信息
-        var mHtml = __dirname + "/../../html/setwifi.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/geteth.html') {
-        //显示获取以太网网络信息
-        var mHtml = __dirname + "/../../html/geteth.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/seteth.html') {
-        //显示修改以太网网络信息
-        var mHtml = __dirname + "/../../html/seteth.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/getauth.html') {
-        //显示获取用户名信息
-        var mHtml = __dirname + "/../../html/getauth.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/setauth.html') {
-        //显示设置用户名信息
-        var mHtml = __dirname + "/../../html/setauth.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
-    }
-    else if (req.path == '/gethttpserver.html') {
-        //显示获取服务器信息
-        var mHtml = __dirname + "/../../html/gethttpserver.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
     }
     else if (req.path == '/toterminal.html') {
         //显示配置蓝牙数据上报信息
-        var mHtml = __dirname + "/../../html/toterminal.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return toterminalHtml(req, res);
     }
     else if (req.path == '/cleantoterminal.html') {
         //显示清除蓝牙数据上报信息
-        var mHtml = __dirname + "/../../html/cleantoterminal.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return cleantoterminalHtml(req, res);
     }
     else if (req.path == '/setupload.html') {
         //设置终端指定类型上报
-        var mHtml = __dirname + "/../../html/setupload.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return setuploadHtml(req, res);
     }
     else if (req.path == '/setuploaddefault.html') {
         //显示设置终端默认上报
-        var mHtml = __dirname + "/../../html/setuploaddefault.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return setuploaddefaultHtml(req, res);
     }
     else if (req.path == '/reporteddata.html') {
         //显示定时上报终端数据使能
-        var mHtml = __dirname + "/../../html/reporteddata.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return reporteddataHtml(req, res);
     }
     else if (req.path == '/otmdatainterval.html') {
         //显示设置第三方终端上报间隔
-        var mHtml = __dirname + "/../../html/otmdatainterval.html";
-        var html = fs.readFileSync(mHtml, 'utf8');
-        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
-        res.write(html);
-        res.end();
-        return gJustSpace;
+        return otmdataintervalHtml(req, res);
     }
 
     if (method == 'POST') {
         //192.168.0.117:5000
-        console.log('req.body', req.body);
-        console.log('req.headers', req.headers);
 
         var array = [];
         for (var index = 0; index < req.body.length; index++) {
             const msg = req.body[index];//获取数组每个成员
             const htype = msg.htype;//获取消息类型
             // const obj = JSON.parse(req.body);
-            // console.log('array obj:', obj);
+            
             if (htype === 'gatewayConn') {
                 // console.log('get gatewayConn msg');
                 var marray = {
@@ -614,11 +1559,9 @@ const  handleRoute = (req, res) => {
                     token:gToken,
                 }
 
-                console.log('marray:', marray);
                 array.push(marray);
             }
             else if (htype === 'heartbeat') {
-                console.log('get heartbeat msg');
                 gTimestamp          = msg.timestamp;
                 gPower              = msg.power;
                 gBatteryLevel       = msg.batteryLevel;
@@ -626,19 +1569,61 @@ const  handleRoute = (req, res) => {
                 gGateWayVer         = msg.gatewayVer;
                 gBlemVer            = msg.blemVer;
 
-                console.log('timestamp     :', gTimestamp);
-                console.log('power         :', gPower);
-                console.log('batterylevel  :', gBatteryLevel);
-                console.log('temperature   :', gTemperature);
-                console.log('gatewayver    :', gGateWayVer);
-                console.log('blemver       :', gBlemVer);
+                /*
+                 * console.log('timestamp     :', gTimestamp);
+                 * console.log('power         :', gPower);
+                 * console.log('batterylevel  :', gBatteryLevel);
+                 * console.log('temperature   :', gTemperature);
+                 * console.log('gatewayver    :', gGateWayVer);
+                 * console.log('blemver       :', gBlemVer);
+                 */
+
+                tarsfertoclient(array);
             }
-            else if (htype == 'adv_msg') {
+            else if (htype === 'adv_msg') {
                 handleAdvMessage(msg);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getBlemInfo') {
+                console.log("getbleminfo :", msg.value);
+                console.log("blemVer:", gBlemVer);
+                
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getScaninr') {
+                console.log("getscaninr value:", msg.value);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getWiFi') {
+                console.log("getWiFi ssid:", msg.ssid);
+                console.log("getWiFi psk:", msg.psk);
+                console.log("getWiFi address:", msg.address);
+                console.log("getWiFi netmask:", msg.netmask);
+                console.log("getWiFi gateway:", msg.gateway);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getETH') {
+                console.log("getETH address:", msg.address);
+                console.log("getETH netmask:", msg.netmask);
+                console.log("getETH gateway:", msg.gateway);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getAuth') {
+                console.log('getAuth username:', msg.username);
+                console.log('getAuth password:', msg.password);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'getHttpServer') {
+                console.log('getHttpServer ip:', msg.ip);
+                console.log('getHttpServer port:', msg.port);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'aseq') {
+                tarsfertoclient(array);
+            }
+            else {
             }
         }
-
-        console.log('return:', array);
 
         return array;
     }

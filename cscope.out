@@ -1,0 +1,128 @@
+cscope 15 $HOME/share/webserver/server -q 0000000023 0000000595
+	@1.c
+
+1 
+	~<¡dio.h
+>
+
+2 
+	~<¡dšt.h
+>
+
+3 
+	~<¡dlib.h
+>
+
+4 
+	~<time.h
+>
+
+6 
+	$maš
+() {
+
+8 
+tm
+ 
+times
+;
+
+9 
+Y—r
+ = 2023;
+
+10 
+MÚth
+ = 11;
+
+11 
+Day
+ = 11;
+
+12 
+Hour
+ = 15;
+
+13 
+Mšu‹
+ = 59;
+
+14 
+SecÚd
+ = 31;
+
+16 
+times
+.
+tm_y—r
+ = (
+Y—r
+) - 1900;
+
+17 
+times
+.
+tm_mÚ
+ = (
+MÚth
+) - 1;
+
+18 
+times
+.
+tm_mday
+ = (
+Day
+);
+
+19 
+times
+.
+tm_hour
+ = (
+Hour
+);
+
+20 
+times
+.
+tm_mš
+ = (
+Mšu‹
+);
+
+21 
+times
+.
+tm_£c
+ = (
+SecÚd
+);
+
+22 
+ušt64_t
+ 
+timesss
+ = (ušt64_t)
+	`mktime
+(&
+times
+);
+
+25 
+	`´štf
+ ("%Îu\n", 
+timesss
+);
+
+28 
+	}
+}
+
+	@
+1
+.
+0
+1
+4
+1.c

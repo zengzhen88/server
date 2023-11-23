@@ -8,6 +8,7 @@ const {
 global.gJustSpace = "justspace";
 //这里先用全局变量保存在这里,后续保存到msql中
 const gToken            = "123456789";
+const gCommunityId      = "123456789";
 var gTimestamp          = 0;
 var gPower              = 0;
 var gBatteryLevel       = 0;
@@ -1264,6 +1265,60 @@ const toterminalHtml = (req, res) => {
     }
 }
 
+////显示配置社区ID
+const setcommunityidInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关配置社区ID ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'setcommunityid\' value=\'配置蓝牙数据上报信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const setcommunityid = (req, res) => {
+    var marray  = {
+        htype:"setCommunityId",
+        seq:123,
+        value:req.query.communityId,
+    }
+    console.log('marray:', marray);
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return setcommunityidInfo(req, res, "配置社区ID", 1);
+    // return gArray;
+}
+
+const setcommunityidHtml = (req, res) => {
+    if (req.url === '/setcommunityid.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/setcommunityid.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return setcommunityid(req, res);
+    }
+}
+
 const tarsfertoclient = (array) => {
     if (gNeedConfig) {
         gNeedConfig = 0;
@@ -1409,11 +1464,14 @@ const  handleRoute = (req, res) => {
     const url = req.url;
     const path = req.path;//url.split('?')[0];
 
+    // console.log('method1');
     // console.log('method1', method);
     // console.log('url', url);
     // console.log('path', req.path);
+    // console.log('header', req.headers);
 
     if (method === 'GET' && req.path === '/api/route/list') {
+        req.query = querystring.parse(url.split('?')[1]);
         // /api/route/list/?author=zeng&keyword=123
 
         const author = req.query.author || '';
@@ -1430,6 +1488,7 @@ const  handleRoute = (req, res) => {
     }
 
     if (method === 'GET' && req.path === '/api/route/detail') {
+        req.query = querystring.parse(url.split('?')[1]);
         //192.168.0.117:5000/api/route/detail/?id=x
         const id = req.query.id;
         const detailData = getDetail(id);
@@ -1437,6 +1496,7 @@ const  handleRoute = (req, res) => {
     }
 
     if (method == 'POST' && req.path === '/api/route/update') {
+        req.query = querystring.parse(url.split('?')[1]);
         //192.168.0.117:5000/api/route/update
         const updateRoutes = updateRoute(id, req.body); 
         if (routeData) {
@@ -1451,6 +1511,7 @@ const  handleRoute = (req, res) => {
         //192.168.0.117:5000/api/route/new
         //id + data
         //新增路由
+        req.query = querystring.parse(url.split('?')[1]);
         const postData = req.body;
         const id = req.query.id;
         const routeData = createNewRoute(id, postData);
@@ -1458,88 +1519,114 @@ const  handleRoute = (req, res) => {
     }
 
     if (method == 'GET' && req.path === '/jz231') {
+        req.query = querystring.parse(url.split('?')[1]);
         // console.log('start login');
         return btnLoginHtml(req, res);
     }
     else if (req.path == '/upgradation.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示升级程序
         return upgradationHtml(req, res);
     }
     else if (req.path == '/synctime.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示同步系统时间
         return synctimeHtml(req, res);
     }
     else if (req.path == '/getbleminfo.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取蓝牙信息
         return getbleminfoHtml(req, res);
     }
     else if (req.path == '/setbleminfo.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示修改蓝牙信息
         return setbleminfoHtml(req, res);
     }
     else if (req.path == '/getscaninr.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取蓝牙扫描窗口时间
         return getscaninrHtml(req, res);
     }
     else if (req.path == '/setscaninr.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //修改蓝牙扫描窗口时间
         return setscaninrHtml(req, res);
     }
     else if (req.path == '/getwifi.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取无线网络信息
         return getwifiHtml(req, res);
     }
     else if (req.path == '/setwifi.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示修改获取无线网络信息
         return setwifiHtml(req, res);
     }
     else if (req.path == '/geteth.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取以太网网络信息
         return getethHtml(req, res);
     }
     else if (req.path == '/seteth.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示修改以太网网络信息
         return setethHtml(req, res);
     }
     else if (req.path == '/getauth.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取用户名信息
         return getauthHtml(req, res);
     }
     else if (req.path == '/setauth.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示设置用户名信息
         return setauthHtml(req, res);
     }
     else if (req.path == '/gethttpserver.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示获取服务器信息
         return gethttpserverHtml(req, res);
     }
     else if (req.path == '/httpurl.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示设置Web服务器
         return httpurlHtml(req, res);
     }
     else if (req.path == '/toterminal.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示配置蓝牙数据上报信息
         return toterminalHtml(req, res);
     }
     else if (req.path == '/cleantoterminal.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示清除蓝牙数据上报信息
         return cleantoterminalHtml(req, res);
     }
     else if (req.path == '/setupload.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //设置终端指定类型上报
         return setuploadHtml(req, res);
     }
     else if (req.path == '/setuploaddefault.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示设置终端默认上报
         return setuploaddefaultHtml(req, res);
     }
     else if (req.path == '/reporteddata.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示定时上报终端数据使能
         return reporteddataHtml(req, res);
     }
     else if (req.path == '/otmdatainterval.html') {
+        req.query = querystring.parse(url.split('?')[1]);
         //显示设置第三方终端上报间隔
         return otmdataintervalHtml(req, res);
+    }
+    else if (req.path == '/setcommunityid.html') {
+        req.query = querystring.parse(url.split('?')[1]);
+        //显示设置社区ID
+        return setcommunityidHtml(req, res);
     }
 
     if (method == 'POST') {
@@ -1559,6 +1646,16 @@ const  handleRoute = (req, res) => {
                     token:gToken,
                 }
 
+                array.push(marray);
+            }
+            else if (htype === 'getCommunityId') {
+                var marray = {
+                    htype:"communityId",
+                    seq:"123",
+                    value:gCommunityId,//目前只支持一个，后续改成申请ID号
+                }
+                console.log('marray:', marray);
+                
                 array.push(marray);
             }
             else if (htype === 'heartbeat') {

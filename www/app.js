@@ -9,17 +9,20 @@ const getPostData = (req) => {
             return;
         }
 
+    // console.log('url5');
         if (req.headers['content-type'] !== 'application/json') {
             resolve({});
             return;
         }
 
+    // console.log('url6');
         let postData = '';
 
         req.on('data', (chunk) => {
             postData += chunk.toString();
         });
 
+    // console.log('url7');
         req.on('end', () => {
             if (!postData) {
                 resolve({});
@@ -27,7 +30,9 @@ const getPostData = (req) => {
             }
             // console.log("postData111:", postData);
             // console.log("postData222:", JSON.parse(postData));
+    // console.log('url8');
             resolve(JSON.parse(postData));
+    // console.log('url9');
         });
     });
 
@@ -37,14 +42,22 @@ const getPostData = (req) => {
 const serverHander = (req, res) => {
     const url = req.url;
     req.path = url.split('?')[0];
-    req.query = querystring.parse(url.split('?')[1]);
+    // console.log('path...:', req.path);
+    // console.log('url...:', req.url);
+    // console.log('header', req.headers);
+    // req.query = querystring.parse(url.split('?')[1]);
 
+    // console.log('query:', req.query);
     //处理post数据 (异步的动作)
+    // console.log('url1');
     getPostData(req).then((postData) => {
+    // console.log('url2');
         req.body = postData;
+    // console.log('url3');
 
         //路由相关的接口
         const routeData = handleRoute(req, res);
+    // console.log('url4');
         if (routeData == gJustSpace) {
             return;
         }

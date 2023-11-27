@@ -48,7 +48,8 @@ const btnLoginInfo = (request, respond, strings) => {
 }
 
 const btnLoginHtml = (req, res) => {
-    if (req.url === '/jz231') {
+    if (req.url === '/gz231'
+        || req.url === '/jgd215') {
         //显示登录页面
         var mHtml = __dirname + "/../../html/index.html";
         var html = fs.readFileSync(mHtml, 'utf8');
@@ -59,10 +60,22 @@ const btnLoginHtml = (req, res) => {
     }
     else {
         //显示登录界面成功与否
-        if (req.query.username === 'admin'
-            && req.query.password == '123456') {
+        if ((req.url.split('?')[0] === '/jgd215')
+            && (req.query.username === 'admin')
+            && (req.query.password === '123456')) {
             //显示功能界面
-            var mHtml = __dirname + "/../../html/main.html";
+            var mHtml = __dirname + "/../../html/jgd215main.html";
+            var html = fs.readFileSync(mHtml, 'utf8');
+            res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+            res.write(html);
+            res.end();
+            return gJustSpace;
+        }
+        else if ((req.url.split('?')[0] === '/gz231')
+            && (req.query.username === 'admin')
+            && (req.query.password === '654321')) {
+            //显示功能界面
+            var mHtml = __dirname + "/../../html/gz231main.html";
             var html = fs.readFileSync(mHtml, 'utf8');
             res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
             res.write(html);
@@ -256,7 +269,45 @@ const synctimeHtml = (req, res) => {
     var marray = {
         htype:"synTime",
         seq:123,
-        time:((parseInt(currentTime.getTime()/1000)) - (currentTime.getTimezoneOffset()*60*1000)),
+        time:((parseInt(currentTime.getTime()/1000)) - (currentTime.getTimezoneOffset()*60)),
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    var timestring = "同步Web服务器系统时间:";
+    timestring += String(currentTime.getFullYear());
+    timestring += '年 ';
+    timestring += String(currentTime.getMonth() + 1);
+    timestring += '月 ';
+    timestring += String(currentTime.getDate());
+    timestring += '日 ';
+    timestring += String(currentTime.getHours());
+    timestring += ':';
+    timestring += String(currentTime.getMinutes());
+    timestring += ':';
+    timestring += String(currentTime.getSeconds());
+    return synctimeInfo(req, res, timestring, 1);
+}
+
+const startsynctimeHtml = (req, res) => {
+    const currentTime = new Date();
+    const timeJson = {
+        year: currentTime.getFullYear(),
+        month: currentTime.getMonth() + 1,
+        day: currentTime.getDate(),
+        hour: currentTime.getHours(),
+        minute: currentTime.getMinutes(),
+        second: currentTime.getSeconds(),
+    };
+    console.log("currentTime:", timeJson);
+    console.log("currentTime:", currentTime.getTime());
+    console.log(currentTime.getTimezoneOffset());
+    console.log(currentTime.getTimezoneOffset()*60*1000);
+    console.log(currentTime.getTimezoneOffset()*60*1000+8*60*60*1000);
+
+    var marray = {
+        htype:"startSyncTime",
+        seq:123,
     }
     gArray.push(marray);
     gNeedConfig = 1;
@@ -1518,7 +1569,8 @@ const  handleRoute = (req, res) => {
         return new SuccessModel(routeData);
     }
 
-    if (method == 'GET' && req.path === '/jz231') {
+    if (method == 'GET' && 
+        (req.path === '/gz231') || (req.path === '/jgd215')) {
         req.query = querystring.parse(url.split('?')[1]);
         // console.log('start login');
         return btnLoginHtml(req, res);
@@ -1532,6 +1584,11 @@ const  handleRoute = (req, res) => {
         req.query = querystring.parse(url.split('?')[1]);
         //显示同步系统时间
         return synctimeHtml(req, res);
+    }
+    else if (req.path == '/startsynctime.html') {
+        req.query = querystring.parse(url.split('?')[1]);
+        //显示同步系统时间
+        return startsynctimeHtml(req, res);
     }
     else if (req.path == '/getbleminfo.html') {
         req.query = querystring.parse(url.split('?')[1]);
@@ -1713,6 +1770,31 @@ const  handleRoute = (req, res) => {
             else if (htype === 'getHttpServer') {
                 console.log('getHttpServer ip:', msg.ip);
                 console.log('getHttpServer port:', msg.port);
+                tarsfertoclient(array);
+            }
+            else if (htype === 'startSyncTime') {
+                console.log("startSyncTime starting...");
+                tarsfertoclient(array);
+            }
+            else if (htype === 'reqSyncTime') {
+                console.log("reqSyncTime starting...:", msg.originate_timestamp);
+                const currentTime   = new Date();
+                const gettime       = (currentTime.getTime()/1000) - (currentTime.getTimezoneOffset()*60);
+                const tz            = currentTime.getTimezoneOffset() / 60;
+                var marray = {
+                    htype:"syncTime",
+                    seq:123,
+                    originate_timestamp:(msg.originate_timestamp),
+                    time_zone:(tz),
+                    receive_timestamp:parseInt(gettime),
+                    transmit_timestamp:parseInt(gettime),
+                }
+                console.log('marray:', marray);
+                
+                array.push(marray);
+            }
+            else if (htype === 'syncTime') {
+                console.log("syncTime endding...:", msg.aseq);
                 tarsfertoclient(array);
             }
             else if (htype === 'aseq') {

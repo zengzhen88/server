@@ -14,7 +14,7 @@ var gPower              = 0;
 var gBatteryLevel       = 0;
 var gTemperature        = 0;
 var gGateWayVer         = '';
-var gBlemVer            = '';
+// var gBlemVer            = '';
 var gNeedConfig         = 0;
 var gArray              = [];
 
@@ -164,6 +164,56 @@ const upgradationHtml = (req, res) => {
             //参数都填写了
             return upgradation(req, res);
         }
+    }
+}
+
+////获取网关状态
+const getGatewayBaseStatusInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取网关状态 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += '<input type=\'submit\' name=\'getGatewayBaseStatus\' value=\'获取网关状态\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
+const getGatewayBaseStatus = (req, res) => {
+    var marray = {
+        htype:"getGatewayBaseStatus",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getGatewayBaseStatusInfo(req, res, "获取网关状态", 1);
+    // return gArray;
+}
+
+const getGatewayBaseStatusHtml = (req, res) => {
+    if (req.url === '/getGatewayBaseStatus.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getGatewayBaseStatus.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getGatewayBaseStatus(req, res);
     }
 }
 
@@ -566,6 +616,30 @@ const getwifiInfo = (request, respond, strings, isSok) => {
     return htmls;
 }
 
+const getwificonfigInfo = (request, respond, strings, isSok) => {
+    respond.setHeader("Content-Type", "text/html;charset=utf-8");
+    var htmls = "<html>";
+    htmls += "<head>";
+    htmls += "<title>";
+    htmls += " 网关获取无线网络信息 ";
+    htmls += "</title>";
+    htmls += "</head>";
+    if (!isSok) {
+        htmls +="<form>";
+        htmls += "ip   : <input type=\'text\' name=\'ip\'/>";
+        htmls += 'port : <input type=\'text\' name=\'port\'/>';
+        htmls += '<input type=\'submit\' name=\'getwificonfig\' value=\'获取无线网络信息\'/>';
+        htmls += '</form>'
+        htmls += '<br>';
+    }
+    htmls += '<p style=\'color:#FF0000;\'> ';
+    htmls += isSok ? "成功:" : "失败:";
+    htmls += strings;
+    htmls += ' </p>';
+    htmls += '</body></html>';
+    return htmls;
+}
+
 const getwifi = (req, res) => {
     var marray = {
         htype:"getWiFi",
@@ -575,6 +649,18 @@ const getwifi = (req, res) => {
     gNeedConfig = 1;
 
     return getwifiInfo(req, res, "获取无线网络信息", 1);
+    // return gArray;
+}
+
+const getwificonfig = (req, res) => {
+    var marray = {
+        htype:"getWiFiConfig",
+        seq:123,
+    }
+    gArray.push(marray);
+    gNeedConfig = 1;
+
+    return getwificonfigInfo(req, res, "获取无线网络信息", 1);
     // return gArray;
 }
 
@@ -590,6 +676,21 @@ const getwifiHtml = (req, res) => {
     }
     else {
         return getwifi(req, res);
+    }
+}
+
+const getwifiConfigHtml = (req, res) => {
+    if (req.url === '/getwificonfig.html') {
+        //显示登录页面
+        var mHtml = __dirname + "/../../html/getwificonfig.html";
+        var html = fs.readFileSync(mHtml, 'utf8');
+        res.writeHead(200, "Content-Type", "text/html;charset=utf-8");
+        res.write(html);
+        res.end();
+        return gJustSpace;
+    }
+    else {
+        return getwificonfig(req, res);
     }
 }
 
@@ -1615,6 +1716,11 @@ const  handleRoute = (req, res) => {
         //显示获取无线网络信息
         return getwifiHtml(req, res);
     }
+    else if (req.path == '/getwificonfig.html') {
+        req.query = querystring.parse(url.split('?')[1]);
+        //显示获取无线网络信息
+        return getwifiConfigHtml(req, res);
+    }
     else if (req.path == '/setwifi.html') {
         req.query = querystring.parse(url.split('?')[1]);
         //显示修改获取无线网络信息
@@ -1685,6 +1791,11 @@ const  handleRoute = (req, res) => {
         //显示设置社区ID
         return setcommunityidHtml(req, res);
     }
+    else if (req.path == '/getGatewayBaseStatus.html') {
+        req.query = querystring.parse(url.split('?')[1]);
+        //获取网关状态
+        return getGatewayBaseStatusHtml(req, res);
+    }
 
     if (method == 'POST') {
         //192.168.0.117:5000
@@ -1721,7 +1832,7 @@ const  handleRoute = (req, res) => {
                 gBatteryLevel       = msg.batteryLevel;
                 gTemperature        = msg.temperature;
                 gGateWayVer         = msg.gatewayVer;
-                gBlemVer            = msg.blemVer;
+                // gBlemVer            = msg.blemVer;
 
                 /*
                  * console.log('timestamp     :', gTimestamp);
@@ -1740,9 +1851,12 @@ const  handleRoute = (req, res) => {
             }
             else if (htype === 'getBlemInfo') {
                 console.log("getbleminfo :", msg.value);
-                console.log("blemVer:", gBlemVer);
+                console.log("aseq:", msg.aseq);
                 
                 tarsfertoclient(array);
+            }
+            else if (htype == 'setBlemInfo') {
+                console.log('setBlemInfo :', msg.aseq);
             }
             else if (htype === 'getScaninr') {
                 console.log("getscaninr value:", msg.value);
@@ -1792,6 +1906,22 @@ const  handleRoute = (req, res) => {
                 console.log('marray:', marray);
                 
                 array.push(marray);
+            }
+            else if (htype == 'getGatewayBaseStatus') {
+                console.log("getGatewayBaseStatus starting....:",
+                    msg.power, msg.batteryLevel, msg.temperature);
+                gPower          = msg.power;
+                gBatteryLevel   = msg.batteryLevel;
+                gTemperature    = msg.temperature;
+            }
+            else if (htype == 'getWiFiConfig') {
+                console.log("getWiFiConfig ssid:", msg.ssid);
+                console.log("getWiFiConfig psk:", msg.psk);
+                console.log("getWiFiConfig address:", msg.address);
+                console.log("getWiFiConfig netmask:", msg.netmask);
+                console.log("getWiFiConfig gateway:", msg.gateway);
+                console.log("getWiFiConfig dns:", msg.dns);
+                tarsfertoclient(array);
             }
             else if (htype === 'syncTime') {
                 console.log("syncTime endding...:", msg.aseq);
